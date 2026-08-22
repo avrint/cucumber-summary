@@ -1,5 +1,8 @@
 name: 'Cucumber GitHub Summary'
 description: 'Generates a GitHub Actions job summary from Cucumber JSON reports'
+branding:
+  icon: 'check'
+  color: 'green'
 inputs:
   report_path:
     description: 'Path to the folder containing Cucumber JSON files'
