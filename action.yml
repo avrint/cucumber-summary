@@ -1,0 +1,10 @@
+name: 'Cucumber GitHub Summary'
+description: 'Generates a GitHub Actions job summary from Cucumber JSON reports'
+inputs:
+  report_path:
+    description: 'Path to the folder containing Cucumber JSON files'
+    required: true
+    default: '.'
+runs:
+  using: 'node24'
+  main: 'index.js'
