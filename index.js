@@ -215,7 +215,7 @@ function renderIndex(tree) {
   for (const { feature, scenarios } of tree) {
     const featureAnchor = slugify(feature);
     const featureFailed = scenarios.some(s => s.status === 'failed');
-    const featureIcon = featureFailed ? `<img src="${failIconUrl}" alt="Failed" />` : `<img src="${passIconUrl}" alt="Passed" />`;
+    const featureIcon = featureFailed ? iconImage(iconColors.Success) : iconImage(iconColors.Success);
 
     md += `- ${featureIcon} [**${escapeMd(feature)}**](#${featureAnchor})\n`;
 
