@@ -1,10 +1,16 @@
 const { existsSync, readFileSync, writeFileSync, readdirSync, statSync } = require('fs');
 const { basename, join, extname } = require('path');
 
+const iconColors = {
+  Success: "#2da44e",
+  Fail: "#cf222e",
+  Neutral: "#6e7781",
+};
+
 const dashboardUrl = "https://svg.test-summary.com/dashboard.svg";
-const passIconUrl = "https://svg.test-summary.com/icon/pass.svg?s=12";
-const failIconUrl = "https://svg.test-summary.com/icon/fail.svg?s=12";
-const skipIconUrl = "https://svg.test-summary.com/icon/skip.svg?s=12";
+const iconImage = (currentColor =  iconColors.Neutral) => currentColor == iconColors.Neutral ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#6e7781" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.28 5.78a.75.75 0 0 0-1.06-1.06l-5.5 5.5a.75.75 0 1 0 1.06 1.06z"/></svg>`: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="${currentColor}" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.78-9.72a.75.75 0 0 0-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0z" class="icon"/></svg>`;
+// const failIconUrl = "https://svg.test-summary.com/icon/fail.svg?s=12";
+// const skipIconUrl = "https://svg.test-summary.com/icon/skip.svg?s=12";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -63,10 +69,10 @@ function escapeMd(text) {
 
 function statusIcon(status) {
   switch ((status || '').toLowerCase()) {
-    case 'passed': return `<img src="${passIconUrl}" alt="Passed" />`;
-    case 'failed': return `<img src="${failIconUrl}" alt="Failed" />`;
+    case 'passed': return iconImage(iconColors.Success);
+    case 'failed': return iconImage(iconColors.Fail);
     case 'skipped':
-    case 'pending': return `<img src="${skipIconUrl}" alt="Skipped" />`;
+    case 'pending': return iconImage(iconColors.Neutral);;
     case 'undefined':
     case 'ambiguous': return '⚠️';
     default: return '❓';
