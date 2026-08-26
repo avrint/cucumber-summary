@@ -2,6 +2,61 @@ const { existsSync, readFileSync, writeFileSync, readdirSync, statSync } = requi
 const { basename, join, extname } = require('path');
 
 
+// ── Markdown Framework ───────────────────────────────────────────────
+
+class MarkdownBuilder {
+  constructor() {
+    this.blocks = [];
+  }
+
+  addHeading (text, level = 1) {
+    this.blocks.push(`${'#'.repeat(level)} ${text}\n\n`);
+    return this;
+  }
+
+  addSeparator () {
+    this.blocks.push(`\n---\n\n`);
+    return this;
+  }
+
+  addDetails (summary, body) {
+    this.blocks.push(`<details>\n<summary>${summary}</summary>\n\n${body}\n</details>\n\n`);
+    return this;
+  }
+
+  addImage (src, alt = '', props = '') {
+    this.blocks.push(`<img src="${src}" alt="${alt}" ${props}>\n`);
+    return this;
+  }
+
+  addListItem (text, indentLevel = 0) {
+    const indent = '  '.repeat(indentLevel);
+    this.blocks.push(`${indent}- ${text}\n`);
+    return this;
+  }
+
+  addCodeBlock (code, lang = '') {
+    this.blocks.push(`\n\`\`\`${lang}\n${code}\n\`\`\`\n\n`);
+    return this;
+  }
+
+  addAnchor (id) {
+    this.blocks.push(`<a id="${id}"></a>\n`);
+    return this;
+  }
+
+  addRaw (text) {
+    if (text) this.blocks.push(text);
+    return this;
+  }
+
+  // The getter you requested to retrieve the final compiled string
+  get finalMD () {
+    return this.blocks.join('');
+  }
+}
+
+
 
 const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, height = 12) => {
   const total = passed + failed + skipped || 1; // Prevent division by zero
@@ -10,7 +65,7 @@ const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, hei
   const s = (skipped / total) * width;
 
   // Generate SVG with colored sections (Green for passed, Red for failed, Gray for skipped)
-  const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect width="${p}" height="${height}" fill="#10B981"/><rect x="${p}" width="${f}" height="${height}" fill="#EF4444"/><rect x="${p+f}" width="${s}" height="${height}" fill="#9CA3AF"/></svg>`;
+  const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect width="${p}" height="${height}" fill="#10B981"/><rect x="${p}" width="${f}" height="${height}" fill="#EF4444"/><rect x="${p + f}" width="${s}" height="${height}" fill="#9CA3AF"/></svg>`;
 
   // Handle Base64 encoding for both Node.js (Buffer) and Browser (btoa) environments
   const base64 = typeof Buffer !== 'undefined' ? Buffer.from(svg).toString('base64') : btoa(svg);
@@ -21,9 +76,9 @@ const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, hei
 let timestamp = Date.now();
 
 const dashboardUrl = "https://svg.test-summary.com/dashboard.svg";
-const failIconUrl = "https://avrint.github.io/cucumber-summary/docs/fail.svg?t="+timestamp;
-const passIconUrl = "https://avrint.github.io/cucumber-summary/docs/pass.svg?t="+timestamp;
-const skipIconUrl = "https://avrint.github.io/cucumber-summary/docs/skip.svg?t="+timestamp; // Changed pass.svg to skip.svg
+const failIconUrl = "https://avrint.github.io/cucumber-summary/docs/fail.svg?t=" + timestamp;
+const passIconUrl = "https://avrint.github.io/cucumber-summary/docs/pass.svg?t=" + timestamp;
+const skipIconUrl = "https://avrint.github.io/cucumber-summary/docs/skip.svg?t=" + timestamp; // Changed pass.svg to skip.svg
 
 const iconColors = {
   Success: passIconUrl,
@@ -34,7 +89,7 @@ const iconColors = {
 const iconImage = (currentColor) => `<img src="${currentColor}" />`;
 // ── helpers ──────────────────────────────────────────────────────────
 
-function findJsonFiles(dir, fileList = []) {
+function findJsonFiles (dir, fileList = []) {
   if (!existsSync(dir)) {
     console.error(`Directory not found: ${dir}`);
     process.exit(1);
@@ -52,7 +107,7 @@ function findJsonFiles(dir, fileList = []) {
   return fileList;
 }
 
-function loadReports(dir) {
+function loadReports (dir) {
   const jsonFiles = findJsonFiles(dir);
   if (jsonFiles.length === 0) {
     console.error(`No JSON files found in directory: ${dir}`);
@@ -75,7 +130,7 @@ function loadReports(dir) {
   return allFeatures;
 }
 
-function escapeHtml(text) {
+function escapeHtml (text) {
   return String(text ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -83,11 +138,11 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
-function escapeMd(text) {
+function escapeMd (text) {
   return String(text ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 }
 
-function statusIcon(status) {
+function statusIcon (status) {
   switch ((status || '').toLowerCase()) {
     case 'passed': return iconImage(iconColors.Success);
     case 'failed': return iconImage(iconColors.Fail);
@@ -99,7 +154,7 @@ function statusIcon(status) {
   }
 }
 
-function msToHuman(ms, options = {}) {
+function msToHuman (ms, options = {}) {
   if (ms == null || isNaN(ms) || ms === 0) return '';
 
   const {
@@ -113,13 +168,13 @@ function msToHuman(ms, options = {}) {
   let absMs = Math.abs(ms);
 
   const UNITS = [
-    { label: compact ? 'y' : ' year',   ms: 31536000000 },
+    { label: compact ? 'y' : ' year', ms: 31536000000 },
     { label: compact ? 'mo' : ' month', ms: 2629800000 },
-    { label: compact ? 'd' : ' day',    ms: 86400000 },
-    { label: compact ? 'h' : ' hour',   ms: 3600000 },
-    { label: compact ? 'm' : ' min',    ms: 60000 },
-    { label: compact ? 's' : ' sec',    ms: 1000 },
-    { label: compact ? 'ms' : ' ms',    ms: 1 }
+    { label: compact ? 'd' : ' day', ms: 86400000 },
+    { label: compact ? 'h' : ' hour', ms: 3600000 },
+    { label: compact ? 'm' : ' min', ms: 60000 },
+    { label: compact ? 's' : ' sec', ms: 1000 },
+    { label: compact ? 'ms' : ' ms', ms: 1 }
   ];
 
   const parts = [];
@@ -142,7 +197,7 @@ function msToHuman(ms, options = {}) {
   return isNegative ? `-${result}` : result;
 }
 
-function slugify(text) {
+function slugify (text) {
   return String(text)
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
@@ -151,11 +206,11 @@ function slugify(text) {
     .replace(/^-|-$/g, '');
 }
 
-function stepDurationMs(d) {
+function stepDurationMs (d) {
   return d / 1e6;
 }
 
-function getScenarioStatus(scenario) {
+function getScenarioStatus (scenario) {
   const steps = scenario.steps || [];
   if (!steps.length) return 'unknown';
   if (steps.some(s => s.result?.status === 'failed')) return 'failed';
@@ -167,13 +222,13 @@ function getScenarioStatus(scenario) {
   return 'unknown';
 }
 
-function scenarioDurationMs(scenario) {
+function scenarioDurationMs (scenario) {
   return (scenario.steps || []).reduce((sum, s) => sum + stepDurationMs(s.result?.duration), 0);
 }
 
 // ── collect ──────────────────────────────────────────────────────────
 
-function collect(features) {
+function collect (features) {
   const stats = {
     passed: 0, failed: 0, skipped: 0, pending: 0,
     undefined: 0, ambiguous: 0, total: 0, duration: 0,
@@ -210,7 +265,8 @@ function collect(features) {
 
 // ── render ───────────────────────────────────────────────────────────
 
-function renderGlobalSummary(stats) {
+function renderGlobalSummary (stats) {
+  const md = new MarkdownBuilder();
   const duration = msToHuman(stats.duration);
   const failedCount = stats.failed + stats.ambiguous + stats.undefined;
   const skippedCount = stats.skipped + stats.pending;
@@ -220,46 +276,46 @@ function renderGlobalSummary(stats) {
   if (failedCount > 0) summaryText += `${summaryText ? ", " : ""}${failedCount} failed`;
   if (skippedCount > 0) summaryText += `${summaryText ? ", " : ""}${skippedCount} skipped`;
 
-  let md = `### Cucumber Results\n\n`;
-  md += `<img src="${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}" alt="${summaryText}">\n`;
-  // md += `${createProgressBar(stats.passed, stats.failed, stats.skipped)}\n`;
-  // md += `[ref-1]: https://avrint.github.io/cucumber-summary/docs/pass.svg?t=1787716243845\n`;
+  md.addHeading('Cucumber Results', 3)
+    .addImage(`${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}`, summaryText);
 
-  if (duration) md += `\n⏱ **Duration:** ${duration}\n`;
-  md += `\n---\n\n`;
+  if (duration) {
+    md.addRaw(`\n⏱ **Duration:** ${duration}\n`);
+  }
 
-  return md;
+  return md.addSeparator().finalMD;
 }
 
 
 
-function renderIndex(tree) {
-  let md = `### Features\n\n`;
+function renderIndex (tree) {
+  const md = new MarkdownBuilder();
+  md.addHeading('Features', 3);
 
   for (const { feature, scenarios } of tree) {
     const featureAnchor = slugify(feature);
     const featureFailed = scenarios.some(s => s.status === 'failed');
     const featureIcon = featureFailed ? iconImage(iconColors.Fail) : iconImage(iconColors.Success);
 
-    md += `- ${featureIcon} [**${escapeMd(feature)}**](#${featureAnchor})\n`;
+    md.addListItem(`${featureIcon} [**${escapeMd(feature)}**](#${featureAnchor})`, 0);
 
     for (const { scenario, status } of scenarios) {
       const name = scenario.name || 'Scenario';
       const anchor = slugify(`${feature}-${name}`);
       const icon = statusIcon(status);
-      md += `  - ${icon} [${escapeMd(name)}](#${anchor})\n`;
+      md.addListItem(`${icon} [${escapeMd(name)}](#${anchor})`, 1);
     }
   }
 
-  md += `\n---\n\n`;
-  return md;
+  return md.addSeparator().finalMD;
 }
 
-function renderSteps(scenario) {
+function renderSteps (scenario) {
+  const md = new MarkdownBuilder();
   const steps = scenario.steps || [];
+
   if (!steps.length) return '_No steps_\n';
 
-  let body = '';
   for (const step of steps) {
     const status = step.result?.status || 'unknown';
     const icon = statusIcon(status);
@@ -268,24 +324,25 @@ function renderSteps(scenario) {
     const dur = msToHuman(stepDurationMs(step.result?.duration));
     const durSuffix = dur ? ` _( ${dur} )_` : '';
 
-    body += `${icon} **${escapeHtml(keyword)}** ${escapeHtml(name)}${durSuffix}<br/>\n`;
+    md.addRaw(`${icon} **${escapeHtml(keyword)}** ${escapeHtml(name)}${durSuffix}<br/>\n`);
 
     if (status === 'failed' && step.result?.error_message) {
       const err = step.result.error_message.trim().slice(0, 4000);
-      body += `\n\`\`\`\n${err}\n\`\`\`\n`;
+      md.addCodeBlock(err);
     }
   }
-  return body;
+  return md.finalMD;
 }
-
-function renderFeatures(tree) {
-  let md = '';
+function renderFeatures (tree) {
+  const md = new MarkdownBuilder();
 
   for (const { feature, uri, scenarios } of tree) {
     const featureAnchor = slugify(feature);
-    md += `<a id="${featureAnchor}"></a>\n`;
-    md += `## ${escapeMd(feature)}\n\n`;
-    if (uri) md += `📄 \`${uri}\`\n\n`;
+
+    md.addAnchor(featureAnchor)
+      .addHeading(escapeMd(feature), 2);
+
+    if (uri) md.addRaw(`📄 \`${uri}\`\n\n`);
 
     for (const { scenario, status, duration } of scenarios) {
       const name = scenario.name || 'Scenario';
@@ -293,20 +350,21 @@ function renderFeatures(tree) {
       const icon = statusIcon(status);
       const dur = msToHuman(duration);
 
-      md += `<a id="${anchor}"></a>\n`;
-      md += `### ${icon} ${escapeMd(name)}\n\n`;
-      if (dur) md += `⏱ ${dur}\n\n`;
+      md.addAnchor(anchor)
+        .addHeading(`${icon} ${escapeMd(name)}`, 3);
 
-      md += `<details>\n<summary>Steps</summary>\n\n`;
-      md += renderSteps(scenario);
-      md += `\n</details>\n\n`;
+      if (dur) md.addRaw(`⏱ ${dur}\n\n`);
+
+      // Build steps content first, then inject into details block
+      const stepsContent = renderSteps(scenario);
+      md.addDetails('Steps', stepsContent);
     }
-    md += `---\n\n`;
+    md.addSeparator();
   }
-  return md;
+  return md.finalMD;
 }
 
-function buildMarkdown(features) {
+function buildMarkdown (features) {
   const { stats, tree } = collect(features);
   return renderGlobalSummary(stats) + renderIndex(tree) + renderFeatures(tree);
 }
@@ -319,9 +377,9 @@ const inputDir = process.env.INPUT_REPORT_PATH || process.argv[2] || '.';
 try {
   const features = loadReports(inputDir);
   const markdown = buildMarkdown(features);
-  
+
   const summaryFile = process.env.GITHUB_STEP_SUMMARY;
-  
+
   if (summaryFile) {
     // Append to the GitHub Action summary file
     writeFileSync(summaryFile, markdown, { encoding: 'utf8', flag: 'a' });
