@@ -22,8 +22,8 @@ let timestamp = Date.now();
 
 const dashboardUrl = "https://svg.test-summary.com/dashboard.svg";
 const failIconUrl = "https://avrint.github.io/cucumber-summary/docs/fail.svg?t="+timestamp;
-const passIconUrl = "https://avrint.github.io/cucumber-summary/docs/skip.svg?t="+timestamp;
-const skipIconUrl = "https://avrint.github.io/cucumber-summary/docs/pass.svg?t="+timestamp;
+const passIconUrl = "https://avrint.github.io/cucumber-summary/docs/pass.svg?t="+timestamp; // Changed skip.svg to pass.svg
+const skipIconUrl = "https://avrint.github.io/cucumber-summary/docs/skip.svg?t="+timestamp; // Changed pass.svg to skip.svg
 
 const iconColors = {
   Success: passIconUrl,
