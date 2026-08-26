@@ -56,7 +56,34 @@ class MarkdownBuilder {
   }
 }
 
+function generateCucumberChart (stats, title = "Execution Summary") {
+  const STATUS_MAP = [
+    { key: 'passed', label: 'Passed', color: '#2da44e' },
+    { key: 'failed', label: 'Failed', color: '#cf222e' },
+    { key: 'skipped', label: 'Skipped', color: '#6e7781' },
+    { key: 'pending', label: 'Pending', color: '#d97706' },
+    { key: 'undefined', label: 'Undefined', color: '#8250df' },
+    { key: 'ambiguous', label: 'Ambiguous', color: '#bf4b00' },
+  ];
 
+  const activeStatuses = STATUS_MAP.filter(
+    item => typeof stats[item.key] === 'number' && stats[item.key] > 0
+  );
+
+  if (activeStatuses.length === 0) {
+    return `> [!NOTE]\n> No test execution data available.\n\n`;
+  }
+
+  const themeVariables = activeStatuses
+    .map((status, index) => `    pie${index + 1}: '${status.color}'`)
+    .join('\n');
+
+  const slices = activeStatuses
+    .map(status => `    "${status.label}" : ${stats[status.key]}`)
+    .join('\n');
+
+  return `\`\`\`mermaid\n---\nconfig:\n  theme: base\n  themeVariables:\n${themeVariables}\n    pieOuterStrokeWidth: '2px'\n  pie:\n    textPosition: 0.5\n    donutHole: 0.45\n---\npie showData\n    title ${title}\n${slices}\n\`\`\`\n\n`;
+}
 
 const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, height = 12) => {
   const total = passed + failed + skipped || 1; // Prevent division by zero
@@ -276,9 +303,8 @@ function renderGlobalSummary (stats) {
   if (failedCount > 0) summaryText += `${summaryText ? ", " : ""}${failedCount} failed`;
   if (skippedCount > 0) summaryText += `${summaryText ? ", " : ""}${skippedCount} skipped`;
 
-  md.addHeading('Cucumber Results', 3)
-    .addImage(`${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}`, summaryText);
-
+  md.addRaw(generateCucumberChart(stats, 'Cucumber Results'));
+  
   if (duration) {
     md.addRaw(`\n⏱ **Duration:** ${duration}\n`);
   }
