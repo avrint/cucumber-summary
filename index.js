@@ -303,7 +303,9 @@ function renderGlobalSummary (stats) {
   if (failedCount > 0) summaryText += `${summaryText ? ", " : ""}${failedCount} failed`;
   if (skippedCount > 0) summaryText += `${summaryText ? ", " : ""}${skippedCount} skipped`;
 
+  md.addRaw('<div align="center" width="400">');
   md.addRaw(generateCucumberChart(stats, 'Cucumber Results'));
+  md.addRaw('</div>');
   
   if (duration) {
     md.addRaw(`\n⏱ **Duration:** ${duration}\n`);
