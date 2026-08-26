@@ -7,6 +7,21 @@ const iconColors = {
   Neutral: "#6e7781",
 };
 
+const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, height = 12) => {
+  const total = passed + failed + skipped || 1; // Prevent division by zero
+  const p = (passed / total) * width;
+  const f = (failed / total) * width;
+  const s = (skipped / total) * width;
+
+  // Generate SVG with colored sections (Green for passed, Red for failed, Gray for skipped)
+  const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect width="${p}" height="${height}" fill="#10B981"/><rect x="${p}" width="${f}" height="${height}" fill="#EF4444"/><rect x="${p+f}" width="${s}" height="${height}" fill="#9CA3AF"/></svg>`;
+
+  // Handle Base64 encoding for both Node.js (Buffer) and Browser (btoa) environments
+  const base64 = typeof Buffer !== 'undefined' ? Buffer.from(svg).toString('base64') : btoa(svg);
+
+  return `<img src="data:image/svg+xml;base64,${base64}" alt="Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}" style="border-radius: 4px;" />`;
+};
+
 const dashboardUrl = "https://svg.test-summary.com/dashboard.svg";
 const iconImage = (currentColor =  iconColors.Neutral) => currentColor == iconColors.Neutral ? `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="#6e7781" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.28 5.78a.75.75 0 0 0-1.06-1.06l-5.5 5.5a.75.75 0 1 0 1.06 1.06z"/></svg>`: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="${currentColor}" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.78-9.72a.75.75 0 0 0-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0z" class="icon"/></svg>`;
 // const failIconUrl = "https://svg.test-summary.com/icon/fail.svg?s=12";
@@ -201,13 +216,16 @@ function renderGlobalSummary(stats) {
   if (skippedCount > 0) summaryText += `${summaryText ? ", " : ""}${skippedCount} skipped`;
 
   let md = `### Cucumber Results\n\n`;
-  md += `<img src="${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}" alt="${summaryText}">\n`;
+  // md += `<img src="${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}" alt="${summaryText}">\n`;
+  md += `${createProgressBar(stats.passed, stats.failed, stats.skipped)}\n`;
 
   if (duration) md += `\n⏱ **Duration:** ${duration}\n`;
   md += `\n---\n\n`;
 
   return md;
 }
+
+
 
 function renderIndex(tree) {
   let md = `### Features\n\n`;
