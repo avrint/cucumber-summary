@@ -29,7 +29,7 @@ const iconColors = {
   Neutral: skipIconUrl,
 };
 
-const iconImage = (currentColor =  iconColors.Neutral) => `<img src="${currentColor}" /></img>`;
+const iconImage = (currentColor) => `<img src="${currentColor}" /></img>`;
 // ── helpers ──────────────────────────────────────────────────────────
 
 function findJsonFiles(dir, fileList = []) {
