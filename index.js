@@ -56,12 +56,12 @@ class MarkdownBuilder {
   }
 }
 
-function generateCucumberChart (stats, title = "Execution Summary") {
+function generateCucumberChart(stats, title = "Execution Summary") {
   const STATUS_MAP = [
-    { key: 'passed', label: 'Passed', color: '#2da44e' },
-    { key: 'failed', label: 'Failed', color: '#cf222e' },
-    { key: 'skipped', label: 'Skipped', color: '#6e7781' },
-    { key: 'pending', label: 'Pending', color: '#d97706' },
+    { key: 'passed',    label: 'Passed',    color: '#2da44e' },
+    { key: 'failed',    label: 'Failed',    color: '#cf222e' },
+    { key: 'skipped',   label: 'Skipped',   color: '#6e7781' },
+    { key: 'pending',   label: 'Pending',   color: '#d97706' },
     { key: 'undefined', label: 'Undefined', color: '#8250df' },
     { key: 'ambiguous', label: 'Ambiguous', color: '#bf4b00' },
   ];
@@ -82,7 +82,8 @@ function generateCucumberChart (stats, title = "Execution Summary") {
     .map(status => `    "${status.label}" : ${stats[status.key]}`)
     .join('\n');
 
-  return `\`\`\`mermaid\n---\nconfig:\n  theme: base\n  themeVariables:\n${themeVariables}\n    pieOuterStrokeWidth: '2px'\n  pie:\n    textPosition: 0.5\n    donutHole: 0.45\n---\npie showData\n    title ${title}\n${slices}\n\`\`\`\n\n`;
+  // Multi-column table wrapper prevents GitHub from forcing 100% full-width rendering
+  return `<table><tr><td width="400px">\n\n\`\`\`mermaid\n---\nconfig:\n  theme: base\n  themeVariables:\n${themeVariables}\n    pieOuterStrokeWidth: '2px'\n  pie:\n    textPosition: 0.5\n    donutHole: 0.45\n---\npie showData\n    title ${title}\n${slices}\n\`\`\`\n\n</td><width="auto"></td></tr></table>\n\n`;
 }
 
 const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, height = 12) => {
