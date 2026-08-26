@@ -18,10 +18,12 @@ const createProgressBar = (passed = 0, failed = 0, skipped = 0, width = 300, hei
   return `<img src="data:image/svg+xml;base64,${base64}" alt="Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}" style="border-radius: 4px;" />`;
 };
 
+let timestamp = Date.now();
+
 const dashboardUrl = "https://svg.test-summary.com/dashboard.svg";
-const failIconUrl = "https://avrint.github.io/cucumber-summary/docs/fail.svg";
-const passIconUrl = "https://avrint.github.io/cucumber-summary/docs/skip.svg";
-const skipIconUrl = "https://avrint.github.io/cucumber-summary/docs/pass.svg";
+const failIconUrl = "https://avrint.github.io/cucumber-summary/docs/fail.svg?t="+timestamp;
+const passIconUrl = "https://avrint.github.io/cucumber-summary/docs/skip.svg?t="+timestamp;
+const skipIconUrl = "https://avrint.github.io/cucumber-summary/docs/pass.svg?t="+timestamp;
 
 const iconColors = {
   Success: passIconUrl,
@@ -29,7 +31,7 @@ const iconColors = {
   Neutral: skipIconUrl,
 };
 
-const iconImage = (currentColor) => `<img src="${currentColor}" /></img>`;
+const iconImage = (currentColor) => `<img src="${currentColor}" />`;
 // ── helpers ──────────────────────────────────────────────────────────
 
 function findJsonFiles(dir, fileList = []) {
@@ -236,7 +238,7 @@ function renderIndex(tree) {
   for (const { feature, scenarios } of tree) {
     const featureAnchor = slugify(feature);
     const featureFailed = scenarios.some(s => s.status === 'failed');
-    const featureIcon = featureFailed ? iconImage(iconColors.Success) : iconImage(iconColors.Success);
+    const featureIcon = featureFailed ? iconImage(iconColors.Fail) : iconImage(iconColors.Success);
 
     md += `- ${featureIcon} [**${escapeMd(feature)}**](#${featureAnchor})\n`;
 
