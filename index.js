@@ -221,9 +221,9 @@ function renderGlobalSummary(stats) {
   if (skippedCount > 0) summaryText += `${summaryText ? ", " : ""}${skippedCount} skipped`;
 
   let md = `### Cucumber Results\n\n`;
-  // md += `<img src="${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}" alt="${summaryText}">\n`;
-  md += `${createProgressBar(stats.passed, stats.failed, stats.skipped)}\n`;
-  md += `[ref-1]: https://avrint.github.io/cucumber-summary/docs/pass.svg?t=1787716243845\n`;
+  md += `<img src="${dashboardUrl}?p=${stats.passed}&f=${failedCount}&s=${skippedCount}" alt="${summaryText}">\n`;
+  // md += `${createProgressBar(stats.passed, stats.failed, stats.skipped)}\n`;
+  // md += `[ref-1]: https://avrint.github.io/cucumber-summary/docs/pass.svg?t=1787716243845\n`;
 
   if (duration) md += `\n⏱ **Duration:** ${duration}\n`;
   md += `\n---\n\n`;
