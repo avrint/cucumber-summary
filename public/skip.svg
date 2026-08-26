@@ -1,0 +1,19 @@
+
+            <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12" viewBox="0 0 16 16" fill="#6e7781">
+              <path fill-rule="evenodd"
+                    d="M 1.5 8
+                       a 6.5 6.5 0 1 1 13 0
+                       a 6.5 6.5 0 0 1 -13 0
+                       z
+                       M 8 0
+                       a 8 8 0 1 0 0 16
+                       A 8 8 0 0 0 8 0
+                       z
+                       m 3.28 5.78
+                       a 0.75 0.75 0 0 0 -1.06 -1.06
+                       l -5.5 5.5
+                       a 0.75 0.75 0 1 0 1.06 1.06
+                       l 5.5 -5.5
+                       z" />
+            </svg>
